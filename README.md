@@ -1,4 +1,3 @@
-# Advertisement Service with Authentication
 
 Сервис объявлений купли/продажи на FastAPI с аутентификацией, ролевой моделью (user/admin), пагинацией и полнотекстовым поиском.
 
