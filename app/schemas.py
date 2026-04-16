@@ -1,62 +1,89 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 from datetime import datetime
-from typing import Optional, List, Any
+from typing import Optional, List
+from enum import Enum
 
 
-# Схемы для объявлений
+class UserRole(str, Enum):
+    USER = "user"
+    ADMIN = "admin"
+
+
+class UserCreate(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+
+    @field_validator('username')
+    def validate_username(cls, v):
+        if not v.strip():
+            raise ValueError('Username cannot be empty')
+        return v.strip()
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(None, min_length=6)
+
+    @field_validator('username')
+    def validate_username(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError('Username cannot be empty')
+        return v.strip() if v else v
+
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    role: UserRole
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user_id: int
+    username: str
+    role: UserRole
+
+
 class AdvertisementCreate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200, description="Заголовок объявления")
-    description: str = Field(..., min_length=1, max_length=5000, description="Описание объявления")
-    price: float = Field(..., gt=0, description="Цена (должна быть больше 0)")
-    author: str = Field(..., min_length=1, max_length=100, description="Автор объявления")
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(..., min_length=1, max_length=5000)
+    price: float = Field(..., gt=0)
 
     @field_validator('title')
-    @classmethod
-    def validate_title(cls, v: str) -> str:
+    def validate_title(cls, v):
         if not v.strip():
-            raise ValueError('Заголовок не может быть пустым или состоять только из пробелов')
+            raise ValueError('Title cannot be empty')
         return v.strip()
 
     @field_validator('description')
-    @classmethod
-    def validate_description(cls, v: str) -> str:
+    def validate_description(cls, v):
         if not v.strip():
-            raise ValueError('Описание не может быть пустым или состоять только из пробелов')
-        return v.strip()
-
-    @field_validator('author')
-    @classmethod
-    def validate_author(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError('Имя автора не может быть пустым или состоять только из пробелов')
+            raise ValueError('Description cannot be empty')
         return v.strip()
 
 
 class AdvertisementUpdate(BaseModel):
-    title: Optional[str] = Field(None, min_length=1, max_length=200, description="Заголовок объявления")
-    description: Optional[str] = Field(None, min_length=1, max_length=5000, description="Описание объявления")
-    price: Optional[float] = Field(None, gt=0, description="Цена (должна быть больше 0)")
-    author: Optional[str] = Field(None, min_length=1, max_length=100, description="Автор объявления")
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, min_length=1, max_length=5000)
+    price: Optional[float] = Field(None, gt=0)
 
     @field_validator('title')
-    @classmethod
-    def validate_title(cls, v: Optional[str]) -> Optional[str]:
+    def validate_title(cls, v):
         if v is not None and not v.strip():
-            raise ValueError('Заголовок не может быть пустым или состоять только из пробелов')
-        return v.strip() if v else v
-
-    @field_validator('description')
-    @classmethod
-    def validate_description(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and not v.strip():
-            raise ValueError('Описание не может быть пустым или состоять только из пробелов')
-        return v.strip() if v else v
-
-    @field_validator('author')
-    @classmethod
-    def validate_author(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and not v.strip():
-            raise ValueError('Имя автора не может быть пустым или состоять только из пробелов')
+            raise ValueError('Title cannot be empty')
         return v.strip() if v else v
 
 
@@ -65,27 +92,21 @@ class AdvertisementResponse(BaseModel):
     title: str
     description: str
     price: float
-    author: str
+    author_id: int
+    author_name: str
     created_at: datetime
 
     class Config:
-        from_attributes = True  # Для Pydantic v2
-
-
-# Пагинация
-class PaginationParams(BaseModel):
-    limit: int = Field(20, ge=1, le=100, description="Количество элементов на странице")
-    offset: int = Field(0, ge=0, description="Смещение для пагинации")
-
+        from_attributes = True
 
 class PaginationMetadata(BaseModel):
-    total: int = Field(..., description="Общее количество элементов")
-    limit: int = Field(..., description="Лимит на странице")
-    offset: int = Field(..., description="Смещение")
-    has_next: bool = Field(..., description="Есть ли следующая страница")
-    has_previous: bool = Field(..., description="Есть ли предыдущая страница")
+    total: int
+    limit: int
+    offset: int
+    has_next: bool
+    has_previous: bool
 
 
 class PaginatedAdvertisementResponse(BaseModel):
-    items: List[AdvertisementResponse] = Field(..., description="Список объявлений")
-    pagination: PaginationMetadata = Field(..., description="Метаданные пагинации")
+    items: List[AdvertisementResponse]
+    pagination: PaginationMetadata
