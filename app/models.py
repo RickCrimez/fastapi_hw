@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Float, Text
 from datetime import datetime
 from app.database import Base
 
+
 class Advertisement(Base):
     __tablename__ = "advertisements"
 
@@ -11,3 +12,6 @@ class Advertisement(Base):
     price = Column(Float, nullable=False)
     author = Column(String(100), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Advertisement(id={self.id}, title='{self.title}', price={self.price})>"

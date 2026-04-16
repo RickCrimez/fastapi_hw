@@ -12,10 +12,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app_network
+    restart: unless-stopped
 
   web:
     build: .
@@ -29,6 +32,13 @@ services:
     volumes:
       - ./app:/app/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - app_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
