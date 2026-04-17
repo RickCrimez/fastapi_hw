@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Advertisement Service",
-    description="Сервис объявлений купли/продажи с авторизацией и пагинацией",
+    description="Сервис объявлений купли/продажи с авторизацией, пагинацией и ролевой моделью",
     version="3.0.0",
     lifespan=lifespan
 )

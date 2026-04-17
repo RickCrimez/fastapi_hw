@@ -27,7 +27,7 @@ try:
     engine = create_engine(DATABASE_URL, pool_pre_ping=True)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base = declarative_base()
-    print(f"✓ Database connected: {DATABASE_URL.split('@')[-1] if '@' in DATABASE_URL else DATABASE_URL}")
+    print(f"✓ Database connected successfully")
 except Exception as e:
     print(f"ERROR: Failed to connect to database: {e}")
     sys.exit(1)

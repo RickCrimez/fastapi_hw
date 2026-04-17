@@ -9,13 +9,15 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 
+# User schemas
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
     password: str = Field(..., min_length=6)
 
     @field_validator('username')
-    def validate_username(cls, v):
+    @classmethod
+    def validate_username(cls, v: str) -> str:
         if not v.strip():
             raise ValueError('Username cannot be empty')
         return v.strip()
@@ -32,7 +34,8 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=6)
 
     @field_validator('username')
-    def validate_username(cls, v):
+    @classmethod
+    def validate_username(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and not v.strip():
             raise ValueError('Username cannot be empty')
         return v.strip() if v else v
@@ -57,19 +60,22 @@ class TokenResponse(BaseModel):
     role: UserRole
 
 
+# Advertisement schemas
 class AdvertisementCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: str = Field(..., min_length=1, max_length=5000)
     price: float = Field(..., gt=0)
 
     @field_validator('title')
-    def validate_title(cls, v):
+    @classmethod
+    def validate_title(cls, v: str) -> str:
         if not v.strip():
             raise ValueError('Title cannot be empty')
         return v.strip()
 
     @field_validator('description')
-    def validate_description(cls, v):
+    @classmethod
+    def validate_description(cls, v: str) -> str:
         if not v.strip():
             raise ValueError('Description cannot be empty')
         return v.strip()
@@ -81,7 +87,8 @@ class AdvertisementUpdate(BaseModel):
     price: Optional[float] = Field(None, gt=0)
 
     @field_validator('title')
-    def validate_title(cls, v):
+    @classmethod
+    def validate_title(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and not v.strip():
             raise ValueError('Title cannot be empty')
         return v.strip() if v else v
@@ -99,6 +106,8 @@ class AdvertisementResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+# Pagination schemas
 class PaginationMetadata(BaseModel):
     total: int
     limit: int

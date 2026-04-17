@@ -10,6 +10,10 @@ SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_HOURS = int(os.getenv("ACCESS_TOKEN_EXPIRE_HOURS", 48))
 
+# Проверка SECRET_KEY в production
+if SECRET_KEY == "dev-secret-key-change-in-production" or len(SECRET_KEY) < 32:
+    print("WARNING: SECRET_KEY is weak or default value! Please set a strong SECRET_KEY in .env")
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

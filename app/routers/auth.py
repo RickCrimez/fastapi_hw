@@ -9,12 +9,12 @@ router = APIRouter(prefix="/login", tags=["authentication"])
 @router.post("/", response_model=schemas.TokenResponse)
 def login(user_login: schemas.UserLogin, db: Session = Depends(get_db)):
     """
-    Аутентификация пользователя и получение токена
+    Аутентификация пользователя и получение JWT токена
 
     - **username**: Имя пользователя
     - **password**: Пароль
 
-    Возвращает токен, действителен 48 часов
+    Возвращает JWT токен, действительный 48 часов
     """
     user = crud.get_user_by_username(db, user_login.username)
 

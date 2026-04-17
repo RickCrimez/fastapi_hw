@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from app import models, schemas, auth
 from typing import Optional, Dict, Any
 
@@ -110,6 +109,7 @@ def search_advertisements(
         limit: int = 20,
         offset: int = 0
 ) -> Dict[str, Any]:
+    """Поиск объявлений с фильтрацией и пагинацией"""
     query = db.query(models.Advertisement).join(models.User)
 
     if title:
@@ -124,10 +124,6 @@ def search_advertisements(
     total = query.count()
     query = query.order_by(models.Advertisement.created_at.desc())
     items = query.limit(limit).offset(offset).all()
-
-    # Добавляем имя автора
-    for ad in items:
-        ad.author_name = ad.author_rel.username
 
     return {
         "items": items,
